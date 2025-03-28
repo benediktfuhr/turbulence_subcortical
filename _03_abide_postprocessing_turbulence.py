@@ -48,10 +48,10 @@ if run_on_server:
     master_maskfile = "/usr/share/fsl/5.0/data/standard/MNI152_T1_1mm_brain_mask.nii.gz"
     fsl_matlab_path = "/usr/share/fsl/5.0/etc/matlab"
 else:
-    rootdir = "/Users/bened/Library/CloudStorage/OneDrive-FondazioneIstitutoItalianoTecnologia/Desktop/University/PhD_IIT/Turbulence_Autisms/Turbulence_Project"
+    rootdir = "/Users/mlombardo/Dropbox/data/abide"
     server_flag = "false"
     master_maskfile = "/usr/local/fsl/data/standard/MNI152_T1_1mm_brain_mask.nii.gz"
-    fsl_matlab_path = "/Users/bened/fsl/etc/matlab"
+    fsl_matlab_path = "/Users/mlombardo/fsl/etc/matlab"
 
 # other directories I need
 datadir = "%s/data" % rootdir
@@ -65,8 +65,9 @@ os.system("mkdir -p %s" % postprocdir)
 metric_type = "turbulence"
 
 # parcellation file to use
-parcfile = "%s/Schaefer1054_7networks_2mm.nii.gz" % parcdir
-cogfile =  "%s/Schaefer1054_CoG_updated.mat" % parcdir
+parcfile = "%s/Schaefer2018_1000Parcels_7Networks_order_FSLMNI152_2mm.nii.gz" % parcdir
+cogfile =  "%s/schaefer_cog.mat" % parcdir
+labelsfile =  "%s/schaefer_labels.mat" % parcdir
 
 # load in MRI params and preproc QC file to get sublist to loop over
 mriparamsfile = "%s/pheno/mriparams_summary_abide_I_abide_II.csv" % datadir
@@ -142,7 +143,7 @@ for sub in sublist:
 
     # Step 3:  compute turbulence
     parc_command = "ts = parcellate('%s', '%s')" % (resamp_ppfile, parcfile)
-    turb_command = "[output] = turbulence('%s', ts, %s, '%s', '%s')" % (sub,tr2use, cogfile,outdir)
+    turb_command = "[output] = turbulence('%s', ts, %s, '%s', '%s', '%s')" % (sub,tr2use, cogfile, labelsfile,outdir)
     matlab_command2run = "cd('%s'); maxNumCompThreads(%d); addpath %s; tic; %s; %s; toc; exit;" % (codedir, maxNumCompThreads, fsl_matlab_path, parc_command, turb_command)
 
     script.append("# Run turbulence pipeline in MATLAB")
