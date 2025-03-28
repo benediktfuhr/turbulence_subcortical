@@ -1,4 +1,4 @@
-function [output] = turbulence(SUB, TS, TR, CoG_file, outdir)
+function [output] = turbulence(SUB, TS, TR, CoG_file, labels_file, outdir)
 
 %% Function that computes the Turbulence-measures for a given subject
 % Input data:
@@ -16,16 +16,13 @@ disp('Running turbulence analysis');
 % parcels as rows and coordinates for cog of each parcel as columns
 % CoG = load(fullfile(root, 'postproc/Files/schaefercog.mat'));
 CoG = load(CoG_file);
-CoG = CoG.Schaefer1054_CoG_updated;
+CoG = CoG.SchaeferCOG;
 
 % RSN: Information about which parcel belongs to which resting state
-% Define label groups and their sizes (info from .txt file of Schaefer1000
-% parcellation of 7networks_2mm_MNI
-group_sizes = [81, 91, 61, 55, 29, 57, 126];
-hemisphere_labels = repelem(1:7, group_sizes)';
-labels = [repmat(hemisphere_labels, 2, 1); repelem(8, 54)'];
-RSNs = ["Visual", "Somatomotor", "Dorsal_Attention", "Saliency_Ventral_Attention", "Limbic", "Control", "Default_Mode", "Subcortical"];
-
+% network, [1000,1] Matrix, with rows as parcels and columns as RSN-number
+% labels = load(fullfile(root, 'postproc/Files/labels.mat'));
+labels = load(labels_file);
+labels = labels.labels;
 
 %Subject specific parameters
 subID = SUB; 
@@ -291,8 +288,7 @@ output.Information_Cascadeflow=Information_Cascadeflow;
 output.GlobalKuramoto=gKoP;
 output.Metastability=Meta;
 output.Lambda = LAMBDA; 
-output.LocalKuramoto = enstrophy1;
-output.Phases = Phases;
+% save(fullfile(root, 'postproc',subID,'measures'), "output");
 save(fullfile(outdir, sprintf('%s_turbulence_measures.mat',subID)), 'output');
 
 % Then each variable as a csv file 
@@ -303,9 +299,10 @@ Information_Transfer_Header = [LAMBDA',Information_Transfer];
 Information_Transfer_Header = [["Lambda", "Value"] ;Information_Transfer_Header];
 Information_Cascadeflow_Header = [LAMBDA',Information_Cascadeflow]; 
 Information_Cascadeflow_Header = [["Lambda", "Value"] ;Information_Cascadeflow_Header];
-Turbulence_Node_Header = [(1:NPARCELLS)',Turbulence_Node]; 
+Turbulence_Node_Header = [(1:1000)',Turbulence_Node]; 
 Turbulence_Node_Header = [["Lambda",LAMBDA];Turbulence_Node_Header];
-Turbulence_RSN_Header = [RSNs',Turbulence_RSN];
+Turbulence_RSN_Header = [["Visual", "Somatomotor", "Attention", "Salience", ...
+    "Limbic", "Control", "Default Mode", "Temporal-Parietal"]',Turbulence_RSN]; 
 Turbulence_RSN_Header = [["Lambda",LAMBDA];Turbulence_RSN_Header];
 
 %Creating cell with all the measures with headers 
